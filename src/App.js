@@ -59,15 +59,15 @@ export default function App() {
         <Search />
         <NumResults movies={movies} />
       </Navbar>
+
       <Main>
         <Box>
           <MovieList movies={movies} />
         </Box>
+        
         <Box>
-          <>
-            <WatchedSummary watched={watched} />
-            <WatchedMoviesList watched={watched} />
-          </>
+          <WatchedSummary watched={watched} />
+          <WatchedMoviesList watched={watched} />
         </Box>
       </Main>
     </>
