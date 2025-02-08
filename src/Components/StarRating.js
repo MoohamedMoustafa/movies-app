@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+
+// Styles for the main container and star container
 const containerStyle = {
   display: "flex",
   alignItems: "center",
@@ -9,49 +11,91 @@ const starContainerStyle = {
   display: "flex",
 };
 
-const textStyle = {
-  lineHeight: "1",
-  margin: "0",
-};
-export default function StarRating({ maxRating = 5 }) {
-  const [rating, setRating] = useState(0);
+// Main StarRating component with customizable props
+// maxRating: maximum number of stars to display
+// color: color of the stars
+// size: size of stars in pixels
+// className: additional CSS classes
+// messages: array of messages to display for each rating
+// defaultRating: initial rating value
+// onSetRating: function to call when rating is set
+export default function StarRating({
+  maxRating = 5,
+  color = "#fcc419",
+  size = 18,
+  className = "",
+  messages = [],
+  defaultRating = 0,
+  onSetRating,
+}) {
+  // Style for the rating text
+  const textStyle = {
+    lineHeight: "1",
+    margin: "0",
+    color,
+    fontSize: `${size}px`,
+  };
+
+  // State for managing permanent rating and temporary rating (on hover)
+  const [rating, setRating] = useState(defaultRating);
   const [tempRating, setTempRating] = useState(0);
+
+  // Handler for setting the permanent rating
   function handleRating(rating) {
     setRating(rating);
+    if(onSetRating){
+      onSetRating();
+    }
   }
+
+  // Handlers for mouse hover effects
   function handleHoverIn(i) {
     setTempRating(i + 1);
-    
   }
+
   function handleHoverOut() {
     setTempRating(0);
   }
+
   return (
-    <div style={containerStyle}>
+    <div style={containerStyle} className={className}>
       <div style={starContainerStyle}>
         {Array.from({ length: maxRating }, (_, i) => (
           <Star
             key={i}
             onRate={() => handleRating(i + 1)}
-            isFull={tempRating? i + 1 <= tempRating : i + 1 <= rating}
+            isFull={tempRating ? i + 1 <= tempRating : i + 1 <= rating}
             onHoverIn={() => handleHoverIn(i)}
             onHoverOut={() => handleHoverOut(i)}
+            color={color}
+            size={size}
           />
         ))}
       </div>
-      <p style={textStyle}>{tempRating || rating || ""}</p>
+      <p style={textStyle}>
+        {messages.length === maxRating
+          ? messages[tempRating ? tempRating - 1 : rating - 1]
+          : tempRating || rating || ""}
+      </p>
     </div>
   );
 }
 
-const starStyle = {
-  width: "24px",
-  height: "24px",
-  cursor: "pointer",
-  display: "block",
-};
+// Individual Star component
+// onRate: function to call when star is clicked
+// isFull: determines if star should be filled or empty
+// onHoverIn/onHoverOut: handlers for hover effects
+// color: star color
+// size: star size
+function Star({ onRate, isFull, onHoverIn, onHoverOut, color, size }) {
+  const starStyle = {
+    width: `${size}px`,
+    height: `${size}px`,
+    color,
+    cursor: "pointer",
+    display: "block",
+  };
 
-function Star({ onRate, isFull, onHoverIn, onHoverOut }) {
   return (
     <span
       role="button"
@@ -64,8 +108,8 @@ function Star({ onRate, isFull, onHoverIn, onHoverOut }) {
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
-          fill="#000"
-          stroke="#000"
+          fill={color}
+          stroke={color}
         >
           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
         </svg>
@@ -74,7 +118,7 @@ function Star({ onRate, isFull, onHoverIn, onHoverOut }) {
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
-          stroke="#000"
+          stroke={color}
         >
           <path
             strokeLinecap="round"
@@ -88,6 +132,7 @@ function Star({ onRate, isFull, onHoverIn, onHoverOut }) {
   );
 }
 
+// SVG paths for filled and empty stars are kept at the bottom for reference
 /*
 FULL STAR
 
