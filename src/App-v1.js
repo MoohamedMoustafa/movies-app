@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const tempMovieData = [
   {
@@ -49,80 +49,27 @@ const tempWatchedData = [
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
-const KEY = "162c4b38";
 export default function App() {
-  const [query, setQuery] = useState("inception");
-  const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  // const tempQuery = "interstellar";
-  useEffect(() => {
-    async function fetchMovies() {
-      try {
-        setIsLoading(true);
-        setError("");
-        const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
-        );
-
-        if (!res.ok) {
-          throw new Error("Something went wrong with fetching movies");
-        }
-        const data = await res.json();
-        if (data.Response === "False") {
-          throw new Error(data.Error);
-        }
-        setMovies(data.Search);
-      } catch (err) {
-        console.error("error from fetchMovies()", err.message);
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    if(query.length < 3) {
-      setMovies([]);
-      setError("");
-      return
-    }
-    fetchMovies();
-  }, [query]);
+  const [movies, setMovies] = useState(tempMovieData);
+  const [watched, setWatched] = useState(tempWatchedData);
 
   return (
     <>
       <Navbar>
-        <Search query={query} setQuery={setQuery} />
+        <Search />
         <NumResults movies={movies} />
       </Navbar>
 
       <Main>
         <Box>
-          {/* {isLoading ? <Loader /> : <MovieList movies={movies} />} */}
-          {isLoading && <Loader />}
-          {!isLoading && !error && <MovieList movies={movies} />}
-          {error && <LocalError error={error} />}
+          <MovieList movies={movies} />
         </Box>
+        
         <Box>
-          <WatchedSummary watched={watched} />
+          <WatchedSummary watched={watched} />  
           <WatchedMoviesList watched={watched} />
         </Box>
       </Main>
-    </>
-  );
-}
-
-function Loader() {
-  return <p className="loader">Loading...</p>;
-}
-
-function LocalError({ error }) {
-  return (
-    <>
-      <p className="error">
-        <span>⛔</span>
-        {error}
-      </p>
     </>
   );
 }
@@ -145,7 +92,8 @@ function Logo() {
   );
 }
 
-function Search({query, setQuery}) {
+function Search() {
+  const [query, setQuery] = useState("");
   return (
     <input
       className="search"
