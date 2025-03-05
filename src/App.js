@@ -76,12 +76,14 @@ export default function App() {
   }
 
   useEffect(() => {
+    const controllar = new AbortController();
     async function fetchMovies() {
       try {
         setIsLoading(true);
         setError("");
         const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+          { signal: controllar.signal }
         );
 
         if (!res.ok) {
@@ -92,9 +94,12 @@ export default function App() {
           throw new Error(data.Error);
         }
         setMovies(data.Search);
+        setError("");
       } catch (err) {
         console.error("error from fetchMovies()", err.message);
-        setError(err.message);
+        if (err.name !== "AbortError") {
+          setError(err.message);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -105,6 +110,10 @@ export default function App() {
       return;
     }
     fetchMovies();
+
+    return function () {
+      controllar.abort();
+    };
   }, [query]);
 
   return (
@@ -308,18 +317,6 @@ function MovieDetails({
     Genre: genre,
     Year: year,
   } = movie;
-  // console.log(
-  //   title,
-  //   year,
-  //   poster,
-  //   runtime,
-  //   imdbRating,
-  //   plot,
-  //   released,
-  //   actors,
-  //   director,
-  //   genre
-  // );
 
   function AddToWatched() {
     const newWatchedMovie = {
@@ -363,6 +360,16 @@ function MovieDetails({
 
     getMovieDetails();
   }, [selectedId]);
+
+  // dynamically change the title
+  useEffect(() => {
+    if (!title) return;
+    document.title = title;
+
+    return function () {
+      document.title = "Movies App";
+    };
+  }, [title]);
 
   return (
     <div className="details">
@@ -485,7 +492,12 @@ function WatchedMovie({ movie, onDeleteMovie }) {
           <span>⏳</span>
           <span>{movie.runtime} min</span>
         </p>
-        <button className="btn-delete" onClick={() => onDeleteMovie(movie.imdbID)}>X</button>
+        <button
+          className="btn-delete"
+          onClick={() => onDeleteMovie(movie.imdbID)}
+        >
+          X
+        </button>
       </div>
     </li>
   );
