@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import StarRating from "./Components/StarRating";
 import { useMovies } from "./Hooks/useMovies";
 import { useLocalStorage } from "./Hooks/useLocalStorage";
+import { useKey } from "./Hooks/useKey";
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
@@ -106,8 +107,16 @@ function Logo() {
 
 function Search({ query, setQuery }) {
   const inputElementRef = useRef(null);
-  // auto focus
-  useEffect(() => {
+  
+  // auto focus and foucs with enter
+  useKey("Enter", () => {
+    if (inputElementRef.current === document.activeElement) return;
+    setQuery("");
+    inputElementRef.current.focus();
+    console.log("hellp");
+    
+  });
+  /* useEffect(() => {
     function callBack(e) {
       if (inputElementRef.current === document.activeElement) return;
       if (e.code === "Enter") {
@@ -121,7 +130,7 @@ function Search({ query, setQuery }) {
     return function () {
       document.removeEventListener("keydown", callBack);
     };
-  }, [setQuery]);
+  }, [setQuery]); */
 
   return (
     <input
@@ -231,6 +240,7 @@ function MovieDetails({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [userRating, setUserRating] = useState(0);
+  useKey("Escape", onCloseMovie); // handle Esc key
   const isWatched = watchedMovies
     .map((movie) => movie.imdbID)
     .includes(selectedId);
@@ -268,11 +278,10 @@ function MovieDetails({
   }
 
   // handle Esc key
-  useEffect(() => {
+  /* useEffect(() => {
     function callBack(e) {
       if (e.code === "Escape") {
         onCloseMovie();
-        console.log("closing from ESC");
       }
     }
     document.addEventListener("keydown", callBack);
@@ -280,7 +289,7 @@ function MovieDetails({
     return function () {
       document.removeEventListener("keydown", callBack);
     };
-  }, [onCloseMovie]);
+  }, [onCloseMovie]); */
 
   // fetch movie
   useEffect(() => {
